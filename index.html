@@ -43,7 +43,6 @@
       populateFilters();
       applyFilter();
 
-      // 初回ロード時のハイライト
       const target = location.hash?.slice(1);
       if (target) {
         setTimeout(() => highlightCard(target), 300);
@@ -68,8 +67,8 @@
       const hairSet = new Set(), gradeSet = new Set(), styleSet = new Set();
       mobData.forEach(d => {
         d['髪色']?.split(',').forEach(h => hairSet.add(h.trim()));
+        d['髪型１']?.split(',').forEach(s => styleSet.add(s.trim()));
         if(d['学年']) gradeSet.add(d['学年']);
-        if(d['髪型１']) styleSet.add(d['髪型１']);
       });
       hairSet.forEach(h => addOption('hairFilter', h));
       gradeSet.forEach(g => addOption('gradeFilter', g));
@@ -94,8 +93,8 @@
 
       const filtered = mobData.filter(d => {
         const hairMatch = !hf || (d['髪色'] && d['髪色'].split(',').map(s => s.trim()).includes(hf));
+        const styleMatch = !sf || (d['髪型１'] && d['髪型１'].split(',').map(s => s.trim()).includes(sf));
         const gradeMatch = !gf || d['学年'] === gf;
-        const styleMatch = !sf || d['髪型１'] === sf;
         const glassesMatch = !gl || d['眼鏡'] === '有';
         return hairMatch && gradeMatch && styleMatch && glassesMatch;
       });
