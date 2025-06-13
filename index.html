@@ -43,19 +43,26 @@
       populateFilters();
       applyFilter();
 
-      // URLにハッシュがあればハイライト
+      // 初回ロード時のハイライト
       const target = location.hash?.slice(1);
       if (target) {
-        setTimeout(() => {
-          const el = document.getElementById(target);
-          if (el) {
-            el.classList.add('highlight');
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => el.classList.remove('highlight'), 2000);
-          }
-        }, 300);
+        setTimeout(() => highlightCard(target), 300);
       }
     }
+
+    function highlightCard(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('highlight');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => el.classList.remove('highlight'), 2000);
+      }
+    }
+
+    window.addEventListener('hashchange', () => {
+      const target = location.hash.slice(1);
+      highlightCard(target);
+    });
 
     function populateFilters() {
       const hairSet = new Set(), gradeSet = new Set(), styleSet = new Set();
