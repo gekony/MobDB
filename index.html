@@ -39,7 +39,6 @@
         return obj;
       }).filter(d => d['ID']);
 
-
       populateFilters();
       applyFilter();
     }
@@ -65,7 +64,19 @@
       const sel = document.getElementById(selId);
       sel.insertAdjacentHTML('beforeend', `<option value="${val}">${val}</option>`);
     }
-@@ -80,44 +81,57 @@
+
+    function applyFilter() {
+      const hf = document.getElementById('hairFilter').value;
+      const gf = document.getElementById('gradeFilter').value;
+      const sf = document.getElementById('styleFilter').value;
+      const gl = document.getElementById('glassesFilter').checked;
+
+      const filtered = mobData.filter(d => {
+        const hairMatch = !hf || (d['髪色'] && d['髪色'].split(',').map(s => s.trim()).includes(hf));
+        const gradeMatch = !gf || d['学年'] === gf;
+        const styleMatch = !sf || d['髪型１'] === sf;
+        const glassesMatch = !gl || d['眼鏡'] === '有';
+        return hairMatch && gradeMatch && styleMatch && glassesMatch;
       });
 
       render(filtered);
@@ -91,29 +102,16 @@
         const imageUrl = ensureJpg(d['画像']);
         const card = document.createElement('div');
         card.className = 'card';
-        card.id = d['ID'];
-        let displayName = d['ID'];
-        if (d['名前']) {
-          displayName = `${d['名前']} (${d['ID']})`;
-        }
-        let sameMobLink = '';
-        if (d['同一モブ']) {
-          const target = d['同一モブ'];
-          sameMobLink = `<a href="#${target}">同一モブ：${target}</a>`;
-        }
-        const hair2 = d['髪型２'] ? `<div>髪型2: ${d['髪型２']}</div>` : '';
-        const notes = d['備考'] ? `<div>備考: ${d['備考']}</div>` : '';
         card.innerHTML = `
-          <img src="${imageUrl}" alt="${displayName}">
-          <div><strong>${displayName}</strong></div>
+          <img src="${imageUrl}" alt="${d['名前'] || d['ID']}">
+          <div><strong>${d['名前'] || d['ID']}</strong></div>
           <div>髪色: ${d['髪色']}</div>
           <div>学年: ${d['学年']}</div>
           <div>髪型1: ${d['髪型１']}</div>
-          ${hair2}
+          <div>髪型2: ${d['髪型２']}</div>
           <div>${d['眼鏡'] === '有' ? '👓 眼鏡あり' : ''}</div>
-          ${notes}
+          <div>備考: ${d['備考']}</div>
           <a href="${d['リンク']}" target="_blank">リンク</a>
-          ${sameMobLink}
         `;
         container.appendChild(card);
       });
