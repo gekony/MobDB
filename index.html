@@ -11,7 +11,8 @@
     .card { width: 200px; border: 1px solid #ccc; padding: .5rem; text-align: center; transition: background 0.5s ease; }
     .card.highlight { background: yellow; }
     .card img { width: 100%; height: auto; }
-    .card a { word-break: break-all; font-size: 0.8em; display: block; margin-top: 0.5em; }
+    .card a { word-break: break-word; font-size: 0.8em; display: inline-block; margin: 0 0.25em; }
+    .same-mob-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25em; font-size: 0.85em; }
   </style>
 </head>
 <body>
@@ -125,7 +126,15 @@
         card.id = d['ID'];
 
         const nameText = d['名前'] ? `${d['名前']} (${d['ID']})` : d['ID'];
-        const sameMobLink = d['同一モブ'] ? `<div><a href="#${d['同一モブ']}">同一モブ: ${d['同一モブ']}</a></div>` : '';
+
+        const sameMobLinks = (d['同一モブ'] ?? '')
+          .split(',')
+          .map(x => x.trim())
+          .filter(x => x)
+          .map(id => `<a href="#${id}">${id}</a>`)
+          .join('');
+        const sameMobDiv = sameMobLinks ? `<div class="same-mob-container">同一モブ: ${sameMobLinks}</div>` : '';
+
         const hairStyle2 = d['髪型２'] ? `<div>髪型2: ${d['髪型２']}</div>` : '';
         const remark = d['備考'] ? `<div>備考: ${d['備考']}</div>` : '';
         const linkText = d['リンク']?.startsWith('http') ? `<a href="${d['リンク']}" target="_blank">リンク</a>` : (d['リンク'] ? `<div>出典：${d['リンク']}</div>` : '');
@@ -139,7 +148,7 @@
           ${hairStyle2}
           <div>${d['眼鏡'] === '有' ? '👓 眼鏡あり' : ''}</div>
           ${remark}
-          ${sameMobLink}
+          ${sameMobDiv}
           ${linkText}
         `;
         container.appendChild(card);
