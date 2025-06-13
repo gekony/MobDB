@@ -128,6 +128,7 @@
         const sameMobLink = d['同一モブ'] ? `<div><a href="#${d['同一モブ']}">同一モブ: ${d['同一モブ']}</a></div>` : '';
         const hairStyle2 = d['髪型２'] ? `<div>髪型2: ${d['髪型２']}</div>` : '';
         const remark = d['備考'] ? `<div>備考: ${d['備考']}</div>` : '';
+        const linkText = d['リンク']?.startsWith('http') ? `<a href="${d['リンク']}" target="_blank">リンク</a>` : (d['リンク'] ? `<div>出典：${d['リンク']}</div>` : '');
 
         card.innerHTML = `
           <img src="${imageUrl}" alt="${nameText}">
@@ -139,7 +140,7 @@
           <div>${d['眼鏡'] === '有' ? '👓 眼鏡あり' : ''}</div>
           ${remark}
           ${sameMobLink}
-          <a href="${d['リンク']}" target="_blank">リンク</a>
+          ${linkText}
         `;
         container.appendChild(card);
       });
