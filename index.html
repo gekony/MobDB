@@ -39,6 +39,7 @@
         return obj;
       }).filter(d => d['ID']);
 
+
       populateFilters();
       applyFilter();
     }
@@ -102,16 +103,29 @@
         const imageUrl = ensureJpg(d['画像']);
         const card = document.createElement('div');
         card.className = 'card';
+        card.id = d['ID'];
+        let displayName = d['ID'];
+        if (d['名前']) {
+          displayName = `${d['名前']} (${d['ID']})`;
+        }
+        let sameMobLink = '';
+        if (d['同一モブ']) {
+          const target = d['同一モブ'];
+          sameMobLink = `<a href="#${target}">同一モブ：${target}</a>`;
+        }
+        const hair2 = d['髪型２'] ? `<div>髪型2: ${d['髪型２']}</div>` : '';
+        const notes = d['備考'] ? `<div>備考: ${d['備考']}</div>` : '';
         card.innerHTML = `
-          <img src="${imageUrl}" alt="${d['名前'] || d['ID']}">
-          <div><strong>${d['名前'] || d['ID']}</strong></div>
+          <img src="${imageUrl}" alt="${displayName}">
+          <div><strong>${displayName}</strong></div>
           <div>髪色: ${d['髪色']}</div>
           <div>学年: ${d['学年']}</div>
           <div>髪型1: ${d['髪型１']}</div>
-          <div>髪型2: ${d['髪型２']}</div>
+          ${hair2}
           <div>${d['眼鏡'] === '有' ? '👓 眼鏡あり' : ''}</div>
-          <div>備考: ${d['備考']}</div>
+          ${notes}
           <a href="${d['リンク']}" target="_blank">リンク</a>
+          ${sameMobLink}
         `;
         container.appendChild(card);
       });
