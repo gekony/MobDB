@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>モブ生徒DB</title>
+  <style>
+    body { font-family: sans-serif; margin: 1rem; }
+    .filter { margin-bottom: 1rem; }
+    .grid { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .card { width: 200px; border: 1px solid #ccc; padding: .5rem; text-align: center; }
+    .card img { width: 100%; height: auto; }
+    .card a { word-break: break-all; font-size: 0.8em; display: block; margin-top: 0.5em; }
+  </style>
+</head>
+<body>
+  <h1>モブ生徒データベース</h1>
+  <div class="filter">
+    髪色：<select id="hairFilter"><option value="">-- 全て --</option></select>
+    髪型1：<select id="styleFilter"><option value="">-- 全て --</option></select>
+    学年：<select id="gradeFilter"><option value="">-- 全て --</option></select>
+    眼鏡：<input type="checkbox" id="glassesFilter"><label for="glassesFilter">ありのみ</label>
+  </div>
+
+  <div class="grid" id="result"></div>
+
+  <script>
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzzaAtY9PHkoLNhL1Stf6fszs22WzAvG7tQrrAmmkztOvXkodTSenhWcER1kcLS5G_eV8uVAV-zk84/pub?gid=0&single=true&output=tsv';
+    let mobData = [];
+
+    async function loadData() {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      const rows = text.trim().split('\n').map(r => r.split('\t'));
+      const headers = rows.shift();
+      mobData = rows.map(cols => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = cols[i]?.trim());
+        return obj;
+      }).filter(d => d['ID']);
+
+      populateFilters();
+      applyFilter();
+    }
+
+    function populateFilters() {
+      const hairSet = new Set(), gradeSet = new Set(), styleSet = new Set();
+      mobData.forEach(d => {
+        d['髪色']?.split(',').forEach(h => hairSet.add(h.trim()));
+        if(d['学年']) gradeSet.add(d['学年']);
+        if(d['髪型１']) styleSet.add(d['髪型１']);
+      });
+      hairSet.forEach(h => addOption('hairFilter', h));
+      gradeSet.forEach(g => addOption('gradeFilter', g));
+      styleSet.forEach(s => addOption('styleFilter', s));
+
+      ['hairFilter','gradeFilter','styleFilter'].forEach(id =>
+        document.getElementById(id).addEventListener('change', applyFilter)
+      );
+      document.getElementById('glassesFilter').addEventListener('change', applyFilter);
+    }
+
+    function addOption(selId, val) {
+      const sel = document.getElementById(selId);
+      sel.insertAdjacentHTML('beforeend', `<option value="${val}">${val}</option>`);
+    }
+
+    function applyFilter() {
+      const hf = document.getElementById('hairFilter').value;
+      const gf = document.getElementById('gradeFilter').value;
+      const sf = document.getElementById('styleFilter').value;
+      const gl = document.getElementById('glassesFilter').checked;
+
+      const filtered = mobData.filter(d => {
+        const hairMatch = !hf || (d['髪色'] && d['髪色'].split(',').map(s => s.trim()).includes(hf));
+        const gradeMatch = !gf || d['学年'] === gf;
+        const styleMatch = !sf || d['髪型１'] === sf;
+        const glassesMatch = !gl || d['眼鏡'] === '有';
+        return hairMatch && gradeMatch && styleMatch && glassesMatch;
+      });
+
+      render(filtered);
+    }
+
+    function ensureJpg(url) {
+      if (!url) return '';
+      let base = url.replace(/\/$/, '');
+      const imgurMatch = base.match(/^https?:\/\/imgur\.com\/([a-zA-Z0-9]+)/);
+      if (imgurMatch) {
+        return `https://i.imgur.com/${imgurMatch[1]}.jpg`;
+      }
+      if (base.includes('i.imgur.com') && !base.match(/\.(jpg|png|gif|jpeg)$/)) {
+        return base + '.jpg';
+      }
+      return base;
+    }
+
+    function render(arr) {
+      const container = document.getElementById('result');
+      container.innerHTML = '';
+      arr.forEach(d => {
+        const imageUrl = ensureJpg(d['画像']);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${imageUrl}" alt="${d['名前'] || d['ID']}">
+          <div><strong>${d['名前'] || d['ID']}</strong></div>
+          <div>髪色: ${d['髪色']}</div>
+          <div>学年: ${d['学年']}</div>
+          <div>髪型1: ${d['髪型１']}</div>
+          <div>髪型2: ${d['髪型２']}</div>
+          <div>${d['眼鏡'] === '有' ? '👓 眼鏡あり' : ''}</div>
+          <div>備考: ${d['備考']}</div>
+          <a href="${d['リンク']}" target="_blank">リンク</a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
