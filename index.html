@@ -76,7 +76,7 @@
       mobData.forEach(d => {
         d['髪色']?.split(',').forEach(h => hairSet.add(h.trim()));
         d['髪型１']?.split(',').forEach(s => styleSet.add(s.trim()));
-        if(d['学年']) gradeSet.add(d['学年']);
+        d['学年']?.split(',').forEach(g => gradeSet.add(g.trim()));
       });
       hairSet.forEach(h => addOption('hairFilter', h));
       gradeSet.forEach(g => addOption('gradeFilter', g));
@@ -103,7 +103,7 @@
       const filtered = mobData.filter(d => {
         const hairMatch = !hf || (d['髪色'] && d['髪色'].split(',').map(s => s.trim()).includes(hf));
         const styleMatch = !sf || (d['髪型１'] && d['髪型１'].split(',').map(s => s.trim()).includes(sf));
-        const gradeMatch = !gf || d['学年'] === gf;
+        const gradeMatch = !gf || (d['学年'] && d['学年'].split(',').map(s => s.trim()).includes(gf));
         const sourceMatch = !src || (d['ID'] && d['ID'][0] === src);
         const glassesMatch = !gl || d['眼鏡'] === '有';
         return hairMatch && gradeMatch && styleMatch && sourceMatch && glassesMatch;
