@@ -119,6 +119,15 @@
     function render(arr) {
       const container = document.getElementById('result');
       container.innerHTML = '';
+
+      const nameMap = {};
+      mobData.forEach(d => {
+        if (d['名前']) {
+          nameMap[d['名前']] ??= [];
+          nameMap[d['名前']].push(d['ID']);
+        }
+      });
+
       arr.forEach(d => {
         const imageUrl = ensureJpg(d['画像']);
         const card = document.createElement('div');
@@ -127,12 +136,13 @@
 
         const nameText = d['名前'] ? `${d['名前']} (${d['ID']})` : d['ID'];
 
-        const sameMobLinks = (d['同一モブ'] ?? '')
-          .split(',')
-          .map(x => x.trim())
-          .filter(x => x)
-          .map(id => `<a href="#${id}">${id}</a>`)
-          .join('');
+        const explicitLinks = (d['同一モブ'] ?? '')
+          .split(',').map(x => x.trim()).filter(x => x);
+
+        const nameBasedLinks = (d['名前'] && nameMap[d['名前']]) ? nameMap[d['名前']].filter(id => id !== d['ID']) : [];
+        const allLinks = [...new Set([...explicitLinks, ...nameBasedLinks])];
+
+        const sameMobLinks = allLinks.map(id => `<a href="#${id}">${id}</a>`).join('');
         const sameMobDiv = sameMobLinks ? `<div class="same-mob-container">同一モブ: ${sameMobLinks}</div>` : '';
 
         const hairStyle2 = d['髪型２'] ? `<div>髪型2: ${d['髪型２']}</div>` : '';
