@@ -21,6 +21,13 @@
     髪色：<select id="hairFilter"><option value="">-- 全て --</option></select>
     髪型1：<select id="styleFilter"><option value="">-- 全て --</option></select>
     学年：<select id="gradeFilter"><option value="">-- 全て --</option></select>
+    媒体：<select id="sourceFilter">
+      <option value="">-- 全て --</option>
+      <option value="C">りんく！らいふ！ラブライブ！</option>
+      <option value="I">カードイラスト</option>
+      <option value="R">活動記録</option>
+      <option value="X">その他</option>
+    </select>
     眼鏡：<input type="checkbox" id="glassesFilter"><label for="glassesFilter">ありのみ</label>
   </div>
 
@@ -75,7 +82,7 @@
       gradeSet.forEach(g => addOption('gradeFilter', g));
       styleSet.forEach(s => addOption('styleFilter', s));
 
-      ['hairFilter','gradeFilter','styleFilter'].forEach(id =>
+      ['hairFilter','gradeFilter','styleFilter','sourceFilter'].forEach(id =>
         document.getElementById(id).addEventListener('change', applyFilter)
       );
       document.getElementById('glassesFilter').addEventListener('change', applyFilter);
@@ -90,14 +97,16 @@
       const hf = document.getElementById('hairFilter').value;
       const gf = document.getElementById('gradeFilter').value;
       const sf = document.getElementById('styleFilter').value;
+      const src = document.getElementById('sourceFilter').value;
       const gl = document.getElementById('glassesFilter').checked;
 
       const filtered = mobData.filter(d => {
         const hairMatch = !hf || (d['髪色'] && d['髪色'].split(',').map(s => s.trim()).includes(hf));
         const styleMatch = !sf || (d['髪型１'] && d['髪型１'].split(',').map(s => s.trim()).includes(sf));
         const gradeMatch = !gf || d['学年'] === gf;
+        const sourceMatch = !src || (d['ID'] && d['ID'][0] === src);
         const glassesMatch = !gl || d['眼鏡'] === '有';
-        return hairMatch && gradeMatch && styleMatch && glassesMatch;
+        return hairMatch && gradeMatch && styleMatch && sourceMatch && glassesMatch;
       });
 
       render(filtered);
